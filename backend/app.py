@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from services.parser import extract_text_from_pdf
 from services.skill_extractor import extract_skills
+from services.text_cleaner import clean_resume_text
 
 app = Flask(__name__)
 CORS(app)
@@ -14,13 +15,15 @@ def analyze_resume():
     file = request.files.get("resume")
     job_role = request.form.get("job_role", "")
 
-    # Step 1: Extract resume text
+    # Step 1: Extract raw text
     resume_text = extract_text_from_pdf(file)
 
-    # Step 2: NLP Skill Extraction
-    skills = extract_skills(resume_text)
+    # Step 2: Clean OCR noise
+    resume_text = clean_resume_text(resume_text)
 
-    # Step 3: Return response with skills
+    # Step 3: Extract skills
+    skills = extract_skills(resume_text)
+    
     return jsonify({
         "message": "Resume parsed successfully",
         "job_role": job_role,

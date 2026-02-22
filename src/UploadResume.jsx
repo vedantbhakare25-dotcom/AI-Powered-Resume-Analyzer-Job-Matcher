@@ -48,15 +48,23 @@ function UploadResume() {
 
       <button onClick={handleSubmit}>Analyze Resume</button>
     {result && (
-    <div>
-        <h3>Response:</h3>
-        <p>Message: {result.message}</p>
-        <p>Job Role: {result.job_role}</p>
-        <p>Filename: {result.filename}</p>
-        <p>Text Length: {result.text_length}</p>
-        <p>Preview: {result.preview}</p>
-    </div>
-    )}
+<div>
+    <h3>Response:</h3>
+    <p><b>Message:</b> {result.message}</p>
+    <p><b>Job Role:</b> {result.job_role}</p>
+    <p><b>Filename:</b> {result.filename}</p>
+    <p><b>Text Length:</b> {result.text_length}</p>
+
+    <p><b>Extracted Skills:</b></p>
+    <ul>
+      {result.skills && result.skills.map((skill, index) => (
+        <li key={index}>{skill}</li>
+      ))}
+    </ul>
+
+    <p><b>Preview:</b> {result.preview}</p>
+</div>
+)}
     </div>
   );
 }
