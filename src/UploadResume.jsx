@@ -5,7 +5,7 @@ function UploadResume() {
   const [file, setFile] = useState(null);
   const [jobRole, setJobRole] = useState("");
   const [result, setResult] = useState(null);
-
+  const [jobDescription, setJobDescription] = useState("");
   const handleSubmit = async () => {
     if (!file) {
       alert("Please upload a resume");
@@ -15,6 +15,7 @@ function UploadResume() {
     const formData = new FormData();
     formData.append("resume", file);
     formData.append("job_role", jobRole);
+    formData.append("job_description", jobDescription);
 
     try {
       const res = await axios.post(
@@ -45,25 +46,57 @@ function UploadResume() {
         onChange={(e) => setJobRole(e.target.value)}
       />
       <br /><br />
-
+      <div>
+      <label>Paste Job Description:</label><br/>
+      <textarea
+        rows="6"
+        cols="60"
+        placeholder="Paste the job requirements here..."
+        value={jobDescription}
+        onChange={(e) => setJobDescription(e.target.value)}
+      />
+      </div>
       <button onClick={handleSubmit}>Analyze Resume</button>
-    {result && (
-<div>
-    <h3>Response:</h3>
-    <p><b>Message:</b> {result.message}</p>
-    <p><b>Job Role:</b> {result.job_role}</p>
-    <p><b>Filename:</b> {result.filename}</p>
-    <p><b>Text Length:</b> {result.text_length}</p>
+{result && (
+  <div style={{ marginTop: "20px" }}>
+    <h3>Analysis Result</h3>
 
-    <p><b>Extracted Skills:</b></p>
+    <p><strong>Filename:</strong> {result.filename}</p>
+    <p><strong>Match Score:</strong> {result.match_score}%</p>
+
+    <h4>Extracted Skills:</h4>
     <ul>
       {result.skills && result.skills.map((skill, index) => (
         <li key={index}>{skill}</li>
       ))}
     </ul>
 
-    <p><b>Preview:</b> {result.preview}</p>
-</div>
+    <h4 style={{ color: "green" }}>Matched Skills:</h4>
+    <ul>
+      {result.matched_skills && result.matched_skills.map((skill, index) => (
+        <li key={index}>{skill}</li>
+      ))}
+    </ul>
+
+    <h4 style={{ color: "red" }}>Missing Skills:</h4>
+    <ul>
+      {result.missing_skills && result.missing_skills.map((skill, index) => (
+        <li key={index}>{skill}</li>
+      ))}
+    </ul>
+    <h4>Suggestions:</h4>
+    <ul>
+      {result.suggestions && result.suggestions.map((suggestion, index) => (
+        <li key={index}>{suggestion}</li>
+      ))}
+    </ul>
+    <p><strong>ATS Score:</strong> {result.ats_score}/100</p>
+    <p style={{fontSize:"12px", color:"gray"}}>
+    Score based on skill match, resume length, and section presence heuristics.
+    </p>
+    <h4>Estimated ATS Compatibility:</h4>
+    <p>{result.summary}</p>
+  </div>
 )}
     </div>
   );
