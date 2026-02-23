@@ -32,10 +32,20 @@ def analyze_resume():
     # 4️⃣ Extract resume skills
     skills = extract_skills(resume_text)
 
-    # 5️⃣ Extract JD skills OR fallback to role mapping
-    jd_skills = extract_skills(job_description)
-    if not jd_skills and job_role:
-        jd_skills = get_role_skills(job_role)
+    # 5️⃣ Determine JD skills properly
+    if job_description.strip():
+        jd_skills = extract_skills(job_description)
+
+    elif job_role.strip():
+        # If role matches predefined roles
+        mapped = get_role_skills(job_role)
+        if mapped:
+            jd_skills = mapped
+        else:
+            # If user typed comma-separated manual skills
+            jd_skills = [skill.strip().lower() for skill in job_role.split(",") if skill.strip()]
+    else:
+        jd_skills = []
 
     # 6️⃣ Skill matching
     matched, missing, score = match_skills(skills, jd_skills)
@@ -44,27 +54,37 @@ def analyze_resume():
     ats_score = calculate_ats_score(resume_text, score)
 
     # 8️⃣ Suggestions generator
-    def generate_suggestions(missing_skills):
+    def generate_suggestions(missing_skills, role_context):
         suggestions = []
+
+        role_context = role_context.lower()
+
         skill_tips = {
-            "machine learning": "Learn ML basics: regression, classification, and sklearn.",
-            "docker": "Learn Docker for containerizing and deploying applications.",
-            "react": "Practice React projects and component lifecycle.",
-            "sql": "Improve SQL queries, joins, and database design.",
-            "python": "Strengthen Python fundamentals and OOP concepts.",
-            "flask": "Build REST APIs using Flask and learn deployment."
+            "aws": "Learn AWS EC2, S3, and deployment pipelines.",
+            "docker": "Learn Docker for containerization and microservices deployment.",
+            "react": "Practice React hooks, state management, and component architecture.",
+            "sql": "Improve SQL joins, indexing, and database optimization.",
+            "python": "Strengthen Python OOP, async programming, and API design.",
+            "flask": "Build scalable REST APIs with Flask and learn production deployment.",
+            "machine learning": "Study regression, classification, and model evaluation using sklearn."
         }
 
         for skill in missing_skills:
             skill_lower = skill.lower()
+
             if skill_lower in skill_tips:
-                suggestions.append(skill_tips[skill_lower])
+                suggestions.append(
+                    f"For {role_context.title()} roles: {skill_tips[skill_lower]}"
+                )
             else:
-                suggestions.append(f"Gain practical knowledge in {skill}.")
+                suggestions.append(
+                    f"For {role_context.title()} roles: Gain practical knowledge in {skill}."
+                )
 
         return suggestions
 
-    suggestions = generate_suggestions(missing)
+    role_context = job_role if job_role else job_description
+    suggestions = generate_suggestions(missing, role_context)
 
     return jsonify({
         "message": "Resume parsed successfully",
