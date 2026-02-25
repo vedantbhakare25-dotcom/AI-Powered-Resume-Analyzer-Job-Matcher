@@ -1,13 +1,22 @@
 import re
 
 def generate_summary(text):
-    # Split into sentences using punctuation
-    sentences = re.split(r'(?<=[.!?]) +', text)
+    text = text.replace("\n", " ")
 
-    # Filter meaningful sentences (length > 40 chars)
-    meaningful = [s.strip() for s in sentences if len(s.strip()) > 40]
+    # Extract Name (first 3 words usually)
+    words = text.split()
+    name = " ".join(words[:2]) if len(words) > 2 else "Candidate"
 
-    # Return top 3 meaningful sentences
-    summary = meaningful[:3]
+    # Extract skills section roughly
+    skills_match = re.search(r"skilled in (.+?)[.;]", text.lower())
+    skills = skills_match.group(1) if skills_match else "Various technologies"
 
-    return " ".join(summary)
+    # Extract experience line
+    exp_match = re.search(r"experience: (.+?)[.;]", text.lower())
+    experience = exp_match.group(1) if exp_match else "Relevant project experience"
+
+    return {
+        "name": name.title(),
+        "skills": skills.title(),
+        "experience": experience.title(),
+    }

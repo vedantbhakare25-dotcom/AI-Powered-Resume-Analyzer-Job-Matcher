@@ -7,6 +7,7 @@ from services.matcher import match_skills
 from services.summarize import generate_summary
 from services.ats_scorer import calculate_ats_score
 from services.role_mapper import get_role_skills
+from services.roadmap_generator import generate_learning_roadmap
 
 app = Flask(__name__)
 CORS(app)
@@ -65,7 +66,7 @@ def analyze_resume():
         return suggestions
 
     suggestions = generate_suggestions(missing, job_role if job_role else "developer")
-
+    roadmap = generate_learning_roadmap(job_role, missing)
     return jsonify({
         "message": "Resume parsed successfully",
         "job_role": job_role,
@@ -75,6 +76,7 @@ def analyze_resume():
         "matched_skills": matched,
         "missing_skills": missing,
         "suggestions": suggestions,
+        "learning_roadmap": roadmap,
         "match_score": score,
         "ats_score": ats_score,
         "summary": summary
